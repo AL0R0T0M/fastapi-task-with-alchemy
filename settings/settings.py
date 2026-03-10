@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     JWT_ALGO: str
     JWT_SECRET_KEY: str
     JWT_EXCPIRE_MINUTE: int
+
+    REDIS_URL: str
     
     model_config = SettingsConfigDict(
         env_file='.env',
@@ -18,3 +20,11 @@ class Settings(BaseSettings):
     @property
     def URL(self) -> str:
         return f'postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}'
+
+    @property
+    def CELERY_BROKER_URL(self) -> str:
+        return f"{self.REDIS_URL}/0"
+
+    @property
+    def CELERY_RESULT_BACKEND(self) -> str:
+        return f"{self.REDIS_URL}/1"

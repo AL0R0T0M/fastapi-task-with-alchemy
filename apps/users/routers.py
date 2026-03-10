@@ -21,6 +21,6 @@ async def get_users(service: User_services = Depends(get_user_service)):
     return result
 
 @UserRouter.post('/')
-async def create_new_user(data: create_User, service: User_services = Depends(get_user_service)):
-    await service.create(data)
+def create_new_user(data: create_User, service: User_services = Depends(get_user_service)):
+    service.create(data)
     return {'ok': True, 'msg': 'user created!'}

@@ -1,6 +1,7 @@
 alembic==1.17.2
 annotated-doc==0.0.4
 annotated-types==0.7.0
+celery==5.3.6
 anyio==4.12.0
 asyncpg==0.31.0
 bcrypt==3.2.2
@@ -23,6 +24,7 @@ pycparser==2.23
 pydantic==2.12.5
 pydantic-core==2.41.5
 pydantic-settings==2.12.0
+redis==5.0.1 # Или другая подходящая версия
 pygments==2.19.2
 pyjwt==2.10.1
 pytest==9.0.2

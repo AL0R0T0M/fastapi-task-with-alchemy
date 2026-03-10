@@ -1,13 +1,15 @@
 from .repository import User_Repository
 from .schemas import create_User
+from .tasks import create_user_task
 
 
 class User_services:
     def __init__(self, repo: User_Repository):
         self.repo = repo
 
-    async def create(self, new_user: create_User):
-        await self.repo.input_data(new_user)
+    def create(self, new_user: create_User):
+        # Преобразуем Pydantic модель в словарь и отправляем в Celery
+        create_user_task.delay(new_user.model_dump())
     
     async def read_users(self):
         return await self.repo.get_users()

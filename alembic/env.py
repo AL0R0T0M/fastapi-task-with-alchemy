@@ -12,7 +12,7 @@ from settings.settings import Settings
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option('sqlalchemy.url', Settings().URL + '?async_fallback=True')
+config.set_main_option('sqlalchemy.url', Settings().URL.replace("asyncpg", "psycopg"))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

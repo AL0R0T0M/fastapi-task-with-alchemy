@@ -1,0 +1,77 @@
+services:
+  db:
+    image: postgres:15
+    container_name: myproject_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file: # Загружаем переменные окружения из .env файла
+      - .env
+    environment: # Сопоставляем переменные из .env с теми, что ожидает образ postgres
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
+      - .env
+    ports:
+      - "5433:5432"
+    networks:
+      - mynetwork
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data # Именованный том для хранения данных Redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mynetwork
+
+  app:
+    container_name: app
+    build: .
+    command: sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    ports:
+      - "8000:8000" # Доступ к FastAPI
+    volumes:
+      - .:/app # Монтируем весь проект для отслеживания изменений
+    depends_on:
+      db:
+        condition: service_healthy # Ожидаем, пока БД будет готова принимать подключения
+      redis:
+        condition: service_healthy # Ожидаем, пока Redis будет готов
+    env_file:
+      - .env
+    networks:
+      - mynetwork
+
+  worker:
+    container_name: worker
+    build: .
+    command: celery -A apps.users.celery_worker.celery_app worker --loglevel=info # Запуск worker'а
+    volumes:
+      - .:/app # Монтируем весь проект для отслеживания изменений
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - mynetwork
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  mynetwork:
+    driver: bridge

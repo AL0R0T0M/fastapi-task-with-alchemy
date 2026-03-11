@@ -8,7 +8,6 @@ class User_services:
         self.repo = repo
 
     def create(self, new_user: create_User):
-        # Преобразуем Pydantic модель в словарь и отправляем в Celery
         create_user_task.delay(new_user.model_dump())
     
     async def read_users(self):
